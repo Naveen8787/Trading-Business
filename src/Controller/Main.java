@@ -3,6 +3,12 @@ package Controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -10,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
@@ -21,15 +28,17 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import businesslogic.services;
+import dao.UserDAO;
 import businesslogic.Validations;
 import model.User;
+import utility.ConnectionManager;
 import model.BestPrice;
 import model.CustomerDetails;
 import model.CropDetails;
 
 //Main class controls all other classes
 public class Main {
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
 		String yes = null;
 		do {	
 		System.out.println("------------------TRADING BUSINESS-------------------");
@@ -37,12 +46,12 @@ public class Main {
 		System.out.println("1. ADMIN LOGIN");
 		System.out.println("2. SIGN UP");
 		System.out.println("3. SIGN IN");
-		System.out.println("4. DISPLAY DETAILS OF DIFFERENT CROPS");
-		System.out.println("5. EXIT");
+		System.out.println("4. DATABASE");
+		System.out.println("5. DISPLAY DETAILS OF DIFFERENT CROPS");
+		System.out.println("6. EXIT");
 		System.out.println("------------------------------------------------------");
 		String username=null;
 		String password=null;
-		String Cpassword=null;
 		int option = 0;
 		BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 		//option is given by user and option is of integer type
@@ -128,7 +137,23 @@ public class Main {
 			  System.out.println("\t\tCOMMISSION AMOUNT: "+commission+" Rupees only"); 
 			  System.out.println("\t\tTOTAL AMOUNT : "+total+" Rupees only");
 			  System.out.println("---------------------------------------------------------------------");
-			  
+
+			  ConnectionManager con = new ConnectionManager();
+			  	System.out.println("Conection Established\n ");				
+				String sql = "insert into trade values(?,?,?,?,?,?,?,?)";
+				PreparedStatement st = con.getConnection().prepareStatement(sql);
+				st.setString(1,details.getName());
+				st.setString(2,details.getFName());
+				st.setString(3,details.getCropName());
+				st.setString(4,details.getIndustry());
+
+				st.setDouble(5,details.getWeight());
+				st.setDouble(6,details.getCost());
+				st.setDouble(7, logic.getcp());
+				st.setDouble(8,logic.getTotal());
+				st.executeUpdate();
+				st.close();
+						  
 			  System.out.println("\n*******************Generating PDF Report*******************\n");  
 			  Document document=new Document();
 				 try {
@@ -139,16 +164,16 @@ public class Main {
 					            Font.NORMAL, BaseColor.LIGHT_GRAY);
 					  Font BlackFont = new Font(Font.FontFamily.TIMES_ROMAN, 15,
 					            Font.NORMAL, BaseColor.BLACK);
-					 PdfWriter writer=PdfWriter.getInstance(document, new FileOutputStream("Trade4.pdf"));
+					 PdfWriter writer=PdfWriter.getInstance(document, new FileOutputStream("Trade7.pdf"));
 					 
 					 //open operation is performed for document to insert data 
 					 document.open();
 					 document.add(new Paragraph("----------------------------Trading Business----------------------------",blueFont));
 					 Paragraph p1 = new Paragraph("Date: "+date,BlackFont);
-			            p1.setAlignment(Paragraph.ALIGN_RIGHT);
-			            //p1.setSpacingAfter(10);
-			            document.add(p1);
-					// document.add(new Paragraph("Date:"+date,BlackFont));
+			         p1.setAlignment(Paragraph.ALIGN_RIGHT);
+			         //p1.setSpacingAfter(10);
+			         document.add(p1);
+					 //document.add(new Paragraph("Date:"+date,BlackFont));
 					 document.add(new Paragraph("Name: "+details.getName(),BlackFont));
 					 document.add(new Paragraph("S/O: "+details.getFName(),BlackFont));
 					 document.add(new Paragraph("Village: "+details.getVillage(),BlackFont));
@@ -166,7 +191,7 @@ public class Main {
 					 //close operation is performed for close the writer
 					 writer.close();
 	                 System.out.println("PDF is generated please take reciept\n");
-
+	          
 				 }
 			catch(DocumentException e) {
 				e.printStackTrace();
@@ -228,10 +253,10 @@ public class Main {
 				username = br.readLine();
 				System.out.println("Enter Password:");
 				password = br.readLine();
-				System.out.println("confrim Password:");
-				Cpassword = br.readLine();
+				//System.out.println("confrim Password:");
+				//Cpassword = br.readLine();
 				//validate1 is an object which call Validation class for validation of user details
-				Validations validate1=new Validations();
+				/* Validations validate1=new Validations();
 				//CheckUserDetails1 method is used to check user details 
 				if(validate1.checkUserDetails1(username,password,Cpassword))
 				{
@@ -243,7 +268,32 @@ public class Main {
 				}
 				else {
 					System.out.println("Please Check Username and Password !!");
-					}	
+					}	*/
+				
+				User user=new User(username, password);
+				user.setUsername(username);
+				user.setPassword(password);
+
+				UserDAO userdao=new UserDAO();
+				int checkUser = 0;
+				try {
+					checkUser = userdao.signUp(user);
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				
+				if(checkUser!=0)
+				{				
+					System.out.println(user.getUsername());
+					System.out.println(user.getPassword());
+					System.out.println("Registration Successful");
+					
+				}
+				else
+				{
+					System.out.println("Check your email and password");
+				}
+				
 				
 		   case 3:
 			   //above sign-up details are entered by user as sign-in details
@@ -253,7 +303,7 @@ public class Main {
 				System.out.println("Enter Password:");
 				password = br.readLine();
 				//validate2 is an object which call Validation class for validation of user details
-				Validations validate2=new Validations();
+				/*Validations validate2=new Validations();
 				//CheckUserDetails2 method is used to check user details
 				if(validate2.checkUserDetails2(username,password))
 				{
@@ -265,11 +315,50 @@ public class Main {
 				else {
 					System.out.println(" Please check your Login Details!!");
 				}
+				*/
+			
+						//user object
+						User user1 = new User(username, password);
+						user1.setUsername(username);
+						user1.setPassword(password);
+						
+						//userdao object
+						UserDAO userdao1 = new UserDAO();
 				
-				
+				boolean validateUser = false;
+				validateUser = userdao1.loginUser(user1);
+				if(validateUser) {
+					User two = new User(username,password);
+					//Below get() methods are used to gets username & password which are entered by users
+					System.out.println("\nUsername:"+two.getUsername()+"\t"+"Password:"+two.getPassword()+"\n");
+					System.out.println("Login Successful !!");
 					
-			case 4:
-				System.out.println("DISPLAY DETAILS OF DIFFERENT CROPS :\n");
+				}else
+				{
+					System.out.println(" Please check your Login Details!!");
+				}	
+			break;
+				
+		   case 4:
+				System.out.println("Fetching Data from Database:\n");
+				System.out.println("____________________________________________________________________\n");
+				Connection con=ConnectionManager.getConnection();
+				Statement st=con.createStatement();
+				String sql = "select name,Fname,CropName,Total from trade";
+				ResultSet rs=st.executeQuery(sql);
+				System.out.println("Name \t\tS/O\t\tCrop-Name \tTotal-Amount");
+				while(rs.next()) {
+					//User User2=new User(password, username);
+				    //User2.setUsername(rs.getString("name"));
+				    System.out.println(rs.getString("name")+"\t\t"+rs.getString("Fname")+"     \t"+rs.getString("CropName")+"     \t"+rs.getDouble("Total"));
+				}
+				rs.close();
+				st.close();
+				con.close();
+				System.out.println("______________________________________________________________________");
+				break;
+			case 5:
+				System.out.println("\nDISPLAY DETAILS OF DIFFERENT CROPS :\n");
 				
 				/*System.out.println(" Crops That are brought are:\n "
 						+ "1.COTTON: It is used for Textiles & Hospital needs "
@@ -324,7 +413,7 @@ public class Main {
 				}
 				yes=br.readLine();
 				break;
-			case 5:
+			case 6:
 				System.out.println("------------------Thank You Visit Again------------------");
 				System.exit(0);//this statement is used to exit.
 						

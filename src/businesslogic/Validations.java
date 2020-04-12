@@ -7,7 +7,8 @@ public class Validations {
 		else 
 			return false;
 	}
-	private final static String[] users = {"Noone","one","two","three","joker"};
+}
+	/*private final static String[] users = {"Noone","one","two","three","joker"};
 	private final static String[] passwords = {"Noone@123", "one@123", "two@123", "three@123", "joker@123"};
 	private final static String[] Cpasswords= {"Noone@123", "one@123", "two@123", "three@123", "joker@123"};
 	public boolean checkUserDetails1(String username, String password,String Cpassword) {
@@ -20,7 +21,7 @@ public class Validations {
 		}
 		return false;
 	}
-	/*	public boolean checkUserDetails2(String username, String password) {
+	public boolean checkUserDetails2(String username, String password) {
 	User one = new User(username,password);	
 	User two=new User(username,password);
 	if(username.equals(one.getUsername()) && password.equals(one.getPassword())) 
@@ -28,7 +29,7 @@ public class Validations {
       return true;
     else 
     	return false;
-		}*/
+		}
   //public boolean checkUserDetails2(String username, String password) {
 	// return true;
 	//}
@@ -40,5 +41,4 @@ public class Validations {
 	        }
 	    }
 	    return false;
-	}
-}
+	}*/

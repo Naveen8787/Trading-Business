@@ -3,13 +3,11 @@ public class User {
 	//variables are declared
 	private String username;
 	private String password;
-	private String Cpassword;
 	//constructors are created with different attributes
 	public User(String username, String password, String cpassword) {
 		
 		this.username = username;
 		this.password = password;
-		this.Cpassword = cpassword;
 	}
 	public User(String username, String password) {
 		this.username = username;
@@ -30,13 +28,5 @@ public class User {
 	//set() are used to set the values of Password
 	public void setPassword(String password) {
 		this.password = password;
-	}
-	//get() are used to get the values of confrimPassword
-	public String getCpassword() {
-		return Cpassword;
-	}
-	//set() are used to set the values of confrimPassword
-	public void setCpassword(String cpassword) {
-		this.Cpassword = cpassword;
 	}	
 }
